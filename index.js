@@ -14,7 +14,6 @@ const baseDir = path.join(__dirname, 'templates')
 console.log("BaseDir: ", baseDir)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 const tabelas = ['aluno', 'curso', 'docente']
 
 app.get('/', (req, res)=>res.sendFile(path.join(baseDir, 'index.html')))
