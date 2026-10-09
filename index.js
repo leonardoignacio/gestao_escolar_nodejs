@@ -14,9 +14,11 @@ const baseDir = path.join(__dirname, 'templates')
 console.log("BaseDir: ", baseDir)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
 const tabelas = ['aluno', 'curso', 'docente']
 
 app.get('/', (req, res)=>res.sendFile(path.join(baseDir, 'index.html')))
+app.get('/form/aluno', (req, res)=>res.sendFile(path.join(baseDir, 'form-aluno.html')))
 
 app.get('/listar/:tabela', async (req,res)=>{
     const { tabela } = req.params
@@ -27,6 +29,22 @@ app.get('/listar/:tabela', async (req,res)=>{
         const dados = await db.query(`SELECT * FROM ${tabela};`)
         
         res.status(200).json([{Code:200, Message:'Sucesso.'}, dados.rows])
+    } catch (erro) {
+        res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro])
+    }
+})
+
+app.post('/cadastrar/aluno', async (req, res)=>{
+    try {
+        let { matricula, nome, data_nascimento } = req.body
+        let dados = [matricula, nome, data_nascimento]
+        let sql = `INSERT INTO 
+                    ALUNO (matricula, nome, data_nascimento) 
+                    VALUES ($1, $2, $3)
+                    RETURNING id, matricula, nome, data_nascimento;
+        `
+        let resp = await db.query(sql, dados)
+        res.status(201).json([{Code:201, Message:'Dados gravados com sucesso.'}, resp.rows[0]])
     } catch (erro) {
         res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro])
     }
