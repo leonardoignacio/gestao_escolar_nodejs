@@ -1,8 +1,11 @@
 import express from 'express'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import dotenv from 'dotenv'
+import db from './db.js'
+dotenv.config()
 const app = express()
-const PORT = 3000
+const PORT = process.env.PORT || 3000
 const __filename = fileURLToPath(import.meta.url)
 console.log("FileName: ",__filename)
 const __dirname = path.dirname(__filename)
@@ -12,6 +15,22 @@ console.log("BaseDir: ", baseDir)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const tabelas = ['aluno', 'curso', 'docente']
+
 app.get('/', (req, res)=>res.sendFile(path.join(baseDir, 'index.html')))
+
+app.get('/listar/:tabela', async (req,res)=>{
+    const { tabela } = req.params
+    try {
+        if (!tabelas.includes(tabela.toLowerCase())){
+            res.status(400).json({Code:400, message:'Bad Request.'})
+        }
+        const dados = await db.query(`SELECT * FROM ${tabela};`)
+        
+        res.status(200).json([{Code:200, Message:'Sucesso.'}, dados.rows])
+    } catch (erro) {
+        res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro])
+    }
+})
 
 app.listen(PORT, () => {console.log('Server is running on http://localhost:'+PORT)})
