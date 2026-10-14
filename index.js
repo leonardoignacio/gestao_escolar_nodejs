@@ -19,6 +19,8 @@ const tabelas = ['aluno', 'curso', 'docente']
 
 app.get('/', (req, res)=>res.sendFile(path.join(baseDir, 'index.html')))
 app.get('/form/aluno', (req, res)=>res.sendFile(path.join(baseDir, 'form-aluno.html')))
+app.get('/form/curso', (req, res)=>res.sendFile(path.join(baseDir, 'form-curso.html')))
+app.get('/form/docente', (req, res)=>res.sendFile(path.join(baseDir, 'form-docente.html')))
 
 app.get('/listar/:tabela', async (req,res)=>{
     const { tabela } = req.params
@@ -34,14 +36,21 @@ app.get('/listar/:tabela', async (req,res)=>{
     }
 })
 
-app.post('/cadastrar/aluno', async (req, res)=>{
+app.post('/cadastrar/:tabela', async (req, res)=>{
     try {
-        let { matricula, nome, data_nascimento } = req.body
-        let dados = [matricula, nome, data_nascimento]
+        let { tabela } = req.params
+        if (!tabelas.includes(tabela.toLowerCase())){
+            res.status(400).json({Code:400, message:'Bad Request.'})
+        }
+        
+        let campos = Object.keys(req.body).join(', ') // Extração dos campos dinâmica
+        let dados = Object.values(req.body) // Extração de dados dinâmica
+        let placeholders = dados.map((dado, i)=>`$${i+1}`).join(', ') 
+        // '$1, $2, $3'
         let sql = `INSERT INTO 
-                    ALUNO (matricula, nome, data_nascimento) 
-                    VALUES ($1, $2, $3)
-                    RETURNING id, matricula, nome, data_nascimento;
+                    ${tabela} (${campos}) 
+                    VALUES (${placeholders})
+                    RETURNING id;
         `
         let resp = await db.query(sql, dados)
         res.status(201).json([{Code:201, Message:'Dados gravados com sucesso.'}, resp.rows[0]])
@@ -50,4 +59,14 @@ app.post('/cadastrar/aluno', async (req, res)=>{
     }
 })
 
+
+
+
 app.listen(PORT, () => {console.log('Server is running on http://localhost:'+PORT)})
+
+
+/*
+    const campos = Object.keys(req.body)
+    const valores = Object.values(req.body)
+    valores.map((_, i) => `$${i + 1}`).join(', ')
+*/
