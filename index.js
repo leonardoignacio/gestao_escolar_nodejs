@@ -45,8 +45,7 @@ app.post('/cadastrar/:tabela', async (req, res)=>{
         
         let campos = Object.keys(req.body).join(', ') // Extração dos campos dinâmica
         let dados = Object.values(req.body) // Extração de dados dinâmica
-        let placeholders = dados.map((dado, i)=>`$${i+1}`).join(', ') 
-        // '$1, $2, $3'
+        let placeholders = dados.map((dado, i)=>`$${i+1}`).join(', ') // '$1, $2, $3'
         let sql = `INSERT INTO 
                     ${tabela} (${campos}) 
                     VALUES (${placeholders})
@@ -59,14 +58,46 @@ app.post('/cadastrar/:tabela', async (req, res)=>{
     }
 })
 
+app.patch('/atualizar/:tabela/:id', async (req, res)=>{
+    try {
+       let { tabela, id } = req.params
+       if (!tabelas.includes(tabela.toLowerCase()) || isNaN(Number(id))){
+            res.status(400).json({Code:400, message:'Bad Request.'})
+        }
+        let campos = Object.keys(req.body) // ['matricula', 'nome', 'data_nascimento'] 
+        let placeholders = campos.map((c, i)=>`${c}=$${i+1}`).join(', ') // 'matricula=$1, nome=$2, data_nascimento=$3'
+        let dados = Object.values(req.body)
+        dados.push(id) // ['2027-00098', 'Joaquim', '1997-12-01', '37']
+       let sql = `
+            UPDATE ${tabela} 
+            SET ${placeholders} 
+            WHERE id=$${dados.length};
+       `
+       let resp = await db.query(sql, dados)
+       res.status(200).json([{Code:200, Message:'Dados atualizados com sucesso.', linhasAfetadas:resp.rowCount}])
+    } catch (erro) {
+        res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro]) 
+    }
+})
 
+app.delete('/deletar/:tabela/:id', async(req, res)=>{
+    try {
+        let { tabela, id } = req.params
+       if (!tabelas.includes(tabela.toLowerCase()) || isNaN(Number(id))){
+            res.status(400).json({Code:400, message:'Bad Request.'})
+        }
+        let sql = `
+            DELETE FROM ${tabela}
+            WHERE id = $1
+        `
+        let resp = await db.query(sql, [id])
+       res.status(200).json([{Code:200, Message:'Dados excluídos com sucesso.', linhasAfetadas:resp.rowCount}])
+    } catch (erro) {
+        res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro]) 
+    }
+})
 
 
 app.listen(PORT, () => {console.log('Server is running on http://localhost:'+PORT)})
 
 
-/*
-    const campos = Object.keys(req.body)
-    const valores = Object.values(req.body)
-    valores.map((_, i) => `$${i + 1}`).join(', ')
-*/
