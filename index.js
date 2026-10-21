@@ -39,12 +39,13 @@ app.get('/listar/:tabela', async (req,res)=>{
 })
 
 app.post('/cadastrar/:tabela', async (req, res)=>{
+
     try {
         let { tabela } = req.params
         if (!validar_req(tabela)){
             res.status(400).json({Code:400, message:'Bad Request.'})
         }
-        let resp = await sql_inserir(body, tabela)
+        let resp = await sql_inserir(req.body, tabela)
         res.status(201).json([{Code:201, Message:'Dados gravados com sucesso.'}, resp.rows[0]])
     } catch (erro) {
         res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro])

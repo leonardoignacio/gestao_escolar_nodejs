@@ -5,7 +5,7 @@ export default {
         let campos = Object.keys(body).join(', ')
         let dados = Object.values(body)
         let placeholders = dados.map((dado, i) => `$${i + 1}`).join(', ')
-        `INSERT INTO 
+        let sql=`INSERT INTO 
         ${tabela} (${campos}) 
         VALUES (${placeholders})
         RETURNING id;`
