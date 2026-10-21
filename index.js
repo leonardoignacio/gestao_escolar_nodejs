@@ -3,9 +3,10 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import dotenv from 'dotenv'
 import validar_req from './controller/controller_validacao_tabela.js'
-import { sql_ler, sql_inserir, sql_atualizar, sql_delete } from './controller/controller_crud.js'
+import crud from './controller/controller_crud.js'
 dotenv.config()
 const app = express()
+const { sql_ler, sql_inserir, sql_atualizar, sql_delete } = crud
 const PORT = process.env.PORT || 3000
 const __filename = fileURLToPath(import.meta.url)
 console.log("FileName: ",__filename)
