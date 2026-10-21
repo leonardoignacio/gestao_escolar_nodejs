@@ -24,5 +24,5 @@ export default {
         return resp
     },
 
-    sql_delete: async (id) => await db.query(`DELETE FROM ${tabela} WHERE id = $1;`, [id])
+    sql_delete: async (id, tabela) => await db.query(`DELETE FROM ${tabela} WHERE id = $1;`, [id])
 }

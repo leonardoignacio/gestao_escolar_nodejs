@@ -71,7 +71,7 @@ app.delete('/deletar/:tabela/:id', async(req, res)=>{
        if (!validar_req(tabela, id)){
             res.status(400).json({Code:400, message:'Bad Request.'})
         }
-        let resp = await sql_delete(id)
+        let resp = await sql_delete(id, tabela)
        res.status(200).json([{Code:200, Message:'Dados excluídos com sucesso.', linhasAfetadas:resp.rowCount}])
     } catch (erro) {
         res.status(500).json([{Code:500, Message:'Erro do servidor.'}, erro]) 
